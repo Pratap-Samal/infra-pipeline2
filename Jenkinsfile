@@ -7,8 +7,6 @@ pipeline {
 
     stages {
 
-
-
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
@@ -41,10 +39,34 @@ pipeline {
             }
         }
 
-        stage('Ansible Deploy') {
+        stage('Extract Public IP') {
+            steps {
+                dir('terraform') {
+                    script {
+                        env.PUBLIC_IP = sh(
+                            script: "terraform output -raw public_ip",
+                            returnStdout: true
+                        ).trim()
+                    }
+                }
+            }
+        }
+
+        stage('Generate Inventory') {
             steps {
                 dir('ansible') {
-                    sh 'ansible-playbook playbook.yml'
+                    writeFile file: 'inventory.ini', text: """
+        [web]
+        ${env.PUBLIC_IP} ansible_user=ec2-user ansible_ssh_private_key_file=../terraform/pratap-key
+        """
+                }
+            }
+        }
+
+        Stage('Ansible Deploy') {
+            steps {
+                dir('ansible') {
+                    sh 'ansible-playbook -i inventory.ini playbook.yml'
                 }
             }
         }
