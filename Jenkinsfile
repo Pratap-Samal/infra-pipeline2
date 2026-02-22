@@ -69,7 +69,7 @@ ${env.PUBLIC_IP} ansible_user=ec2-user
                 dir('ansible') {
                     withCredentials([
                         sshUserPrivateKey(
-                            credentialsId: 'ec2-ssh-key',
+                            credentialsId: 'pratap-key',
                             keyFileVariable: 'SSH_KEY'
                         )
                     ]) {
