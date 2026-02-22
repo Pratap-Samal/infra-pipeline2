@@ -57,17 +57,27 @@ pipeline {
                 dir('ansible') {
                     writeFile file: 'inventory.ini', text: """
 [web]
-${env.PUBLIC_IP} ansible_user=ec2-user ansible_ssh_private_key_file=../terraform/pratap-key
+${env.PUBLIC_IP} ansible_user=ec2-user
 """
                 }
             }
         }
 
+
         stage('Ansible Deploy') {
             steps {
                 dir('ansible') {
-                    sh 'chmod 400 ../terraform/pratap-key'
-                    sh 'ansible-playbook -i inventory.ini playbook.yml'
+                    withCredentials([
+                        sshUserPrivateKey(
+                            credentialsId: 'ec2-ssh-key',
+                            keyFileVariable: 'SSH_KEY'
+                        )
+                    ]) {
+                        sh """
+                        ansible-playbook -i inventory.ini playbook.yml \
+                        --private-key $SSH_KEY
+                        """
+                    }
                 }
             }
         }
