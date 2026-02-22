@@ -26,7 +26,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 dir('terraform') {
-                    sh 'terraform plan'
+                    sh 'terraform plan -out=tfplan'
                 }
             }
         }
@@ -34,7 +34,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform') {
-                    sh 'terraform apply -auto-approve'
+                    sh 'terraform apply -auto-approve tfplan'
                 }
             }
         }
@@ -56,9 +56,9 @@ pipeline {
             steps {
                 dir('ansible') {
                     writeFile file: 'inventory.ini', text: """
-        [web]
-        ${env.PUBLIC_IP} ansible_user=ec2-user ansible_ssh_private_key_file=../terraform/pratap-key
-        """
+[web]
+${env.PUBLIC_IP} ansible_user=ec2-user ansible_ssh_private_key_file=../terraform/pratap-key
+"""
                 }
             }
         }
@@ -66,9 +66,16 @@ pipeline {
         stage('Ansible Deploy') {
             steps {
                 dir('ansible') {
+                    sh 'chmod 400 ../terraform/pratap-key'
                     sh 'ansible-playbook -i inventory.ini playbook.yml'
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "EC2 Public IP: ${env.PUBLIC_IP}"
         }
     }
 }
