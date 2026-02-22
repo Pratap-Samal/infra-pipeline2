@@ -65,6 +65,7 @@ ${env.PUBLIC_IP} ansible_user=ec2-user
 
 
 
+
         stage('Ansible Deploy') {
             steps {
                 dir('ansible') {
