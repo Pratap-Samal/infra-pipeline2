@@ -7,11 +7,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Pratap-Samal/infra-pipeline2.git'
-            }
-        }
+
 
         stage('Terraform Init') {
             steps {
