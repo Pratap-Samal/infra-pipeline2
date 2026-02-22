@@ -1,0 +1,7 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - ap-south-1
+filters:
+  tag:Name: Apache-Server
+hostnames:
+  - public-ip-address
